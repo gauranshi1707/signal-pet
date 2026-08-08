@@ -10,6 +10,8 @@ Stage 2 is complete: the independent transparent pet overlay can be exercised wi
 
 Stage 3 connects a detected Signal toast to this animation. The integration carries no notification object or payload into the animation path—only the event that a matching Signal toast was added.
 
+Settings are stored locally in `%LOCALAPPDATA%\SignalPet\settings.json`. Use the app window to set walking/pause durations, pet size, screen edge, and optional sign-in startup. Startup uses the current user's standard Windows `Run` registry key and requires no administrator privileges.
+
 ## Planned stack
 
 - C# / .NET 8 WPF for the compact desktop UI and future transparent overlay.

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Signal Pet — Detection proof of concept"
         Width="560"
-        Height="300"
+        Height="430"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
   <Grid Margin="24">
@@ -13,7 +13,17 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <TextBlock FontSize="20" FontWeight="SemiBold" Text="Signal Pet notification detector" />
-    <TextBlock Grid.Row="1" Margin="0,18,0,0" TextWrapping="Wrap" Text="Preparing notification access…" x:Name="StatusText" />
+    <StackPanel Grid.Row="1" Margin="0,18,0,0">
+      <TextBlock TextWrapping="Wrap" Text="Preparing notification access…" x:Name="StatusText" />
+      <WrapPanel Margin="0,20,0,0">
+        <StackPanel Margin="0,0,16,10"><TextBlock Text="Walk (ms)" /><TextBox x:Name="WalkText" Width="88" /></StackPanel>
+        <StackPanel Margin="0,0,16,10"><TextBlock Text="Pause (ms)" /><TextBox x:Name="PauseText" Width="88" /></StackPanel>
+        <StackPanel Margin="0,0,16,10"><TextBlock Text="Pet size" /><TextBox x:Name="SizeText" Width="88" /></StackPanel>
+        <StackPanel Margin="0,0,16,10"><TextBlock Text="Screen edge" /><ComboBox x:Name="EdgeBox" Width="100" /></StackPanel>
+      </WrapPanel>
+      <Button Width="120" HorizontalAlignment="Left" Padding="10,6" Content="Save settings" Click="OnSaveSettings" />
+      <CheckBox x:Name="StartupBox" Margin="0,12,0,0" Content="Start Signal Pet when I sign in" Checked="OnStartupChanged" Unchecked="OnStartupChanged" />
+    </StackPanel>
     <Button Grid.Row="2" Width="180" HorizontalAlignment="Left" Padding="14,8" Content="Test pet animation" Click="OnTestPetAnimation" />
   </Grid>
 </Window>
