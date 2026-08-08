@@ -42,8 +42,6 @@ public partial class PetOverlayWindow : Window
         SourceInitialized += (_, _) => MakeInputTransparent();
     }
 
-    protected override bool ShowWithoutActivation => true;
-
     public Task PlayAsync()
     {
         _clock.Start();
