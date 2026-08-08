@@ -6,6 +6,8 @@ Signal Pet is a Windows desktop companion that reacts to an incoming **Signal De
 
 Stage 1 is complete: a privacy-constrained notification-detection proof of concept and the architecture decision are in the repository. See [the Stage 1 research findings](docs/STAGE-1-RESEARCH.md) before continuing to the overlay implementation.
 
+Stage 2 is complete: the independent transparent pet overlay can be exercised with **Test pet animation** in the proof-of-concept window. Its artwork is a text-free vector placeholder and can be replaced through `IPetVisualFactory` without changing the animation or notification code.
+
 ## Planned stack
 
 - C# / .NET 8 WPF for the compact desktop UI and future transparent overlay.

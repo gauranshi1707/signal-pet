@@ -41,6 +41,10 @@ The project must be MSIX-packaged before running: the package manifest declares 
 - The development machine has the .NET 8 runtime but **no .NET SDK or MSIX build tooling**, so this POC cannot be compiled/installed locally yet.
 - A live Signal message was not generated during Stage 1. After installing the SDK and package tooling, validation is: install the signed development MSIX, grant access, send a test message to Signal Desktop, and verify that the POC count increments without any notification text appearing in its UI or logs.
 
+## Stage 2 implementation note
+
+Stage 2 adds an independent WPF overlay and a manual test button. The overlay is borderless, transparent, topmost, excluded from the taskbar, configured not to activate, and marked with `WS_EX_TRANSPARENT`, `WS_EX_NOACTIVATE`, and `WS_EX_TOOLWINDOW` so normal pointer input passes through it. It currently uses the primary monitor work area; monitor selection becomes a persisted option in Stage 4.
+
 ## Sources
 
 - [Microsoft: Notification listener](https://learn.microsoft.com/en-us/windows/apps/develop/notifications/app-notifications/notification-listener)

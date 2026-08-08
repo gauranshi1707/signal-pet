@@ -5,6 +5,7 @@ namespace SignalPet;
 public partial class MainWindow : Window
 {
     private readonly SignalNotificationDetector _detector = new();
+    private readonly PetAnimationController _petAnimation = new();
     private int _detectedCount;
 
     public MainWindow()
@@ -41,5 +42,10 @@ public partial class MainWindow : Window
             _detectedCount++;
             StatusText.Text = $"Detection is active. Signal toast detected: {_detectedCount}. No notification text was accessed.";
         });
+    }
+
+    private async void OnTestPetAnimation(object sender, RoutedEventArgs e)
+    {
+        await _petAnimation.PlayAsync(PetAnimationOptions.Default);
     }
 }
