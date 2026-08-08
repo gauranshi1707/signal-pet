@@ -1,0 +1,15 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+
+# Local signing and package artifacts
+*.pfx
+*.cer
+*.msix
+*.msixbundle
+AppPackages/
+
+# Local application data
+appsettings.local.json
