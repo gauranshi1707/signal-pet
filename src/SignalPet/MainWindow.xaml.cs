@@ -35,13 +35,16 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnSignalToastReceived(object? sender, EventArgs e)
+    private async void OnSignalToastReceived(object? sender, EventArgs e)
     {
-        Dispatcher.Invoke(() =>
+        var animation = await Dispatcher.InvokeAsync(() =>
         {
             _detectedCount++;
             StatusText.Text = $"Detection is active. Signal toast detected: {_detectedCount}. No notification text was accessed.";
+            return _petAnimation.PlayAsync(PetAnimationOptions.Default);
         });
+
+        await animation;
     }
 
     private async void OnTestPetAnimation(object sender, RoutedEventArgs e)

@@ -1,3 +1,5 @@
+using System.Windows;
+
 namespace SignalPet;
 
 /// <summary>
@@ -9,13 +11,23 @@ public sealed class PetAnimationController
 
     public async Task PlayAsync(PetAnimationOptions options)
     {
-        await _gate.WaitAsync();
+        await _gate.WaitAsync().ConfigureAwait(false);
         try
         {
-            var overlay = new PetOverlayWindow(options, new PlaceholderPetVisualFactory());
-            overlay.Show();
-            await overlay.PlayAsync();
-            overlay.Close();
+            PetOverlayWindow? overlay = null;
+            Task playback = Task.CompletedTask;
+
+            // The gate may resume on a worker thread after a burst of events.
+            // Keep every WPF operation on the application's UI dispatcher.
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                overlay = new PetOverlayWindow(options, new PlaceholderPetVisualFactory());
+                overlay.Show();
+                playback = overlay.PlayAsync();
+            });
+
+            await playback.ConfigureAwait(false);
+            await Application.Current.Dispatcher.InvokeAsync(() => overlay?.Close());
         }
         finally
         {

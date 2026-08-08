@@ -8,6 +8,8 @@ Stage 1 is complete: a privacy-constrained notification-detection proof of conce
 
 Stage 2 is complete: the independent transparent pet overlay can be exercised with **Test pet animation** in the proof-of-concept window. Its artwork is a text-free vector placeholder and can be replaced through `IPetVisualFactory` without changing the animation or notification code.
 
+Stage 3 connects a detected Signal toast to this animation. The integration carries no notification object or payload into the animation path—only the event that a matching Signal toast was added.
+
 ## Planned stack
 
 - C# / .NET 8 WPF for the compact desktop UI and future transparent overlay.
