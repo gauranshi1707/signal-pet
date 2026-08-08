@@ -4,12 +4,10 @@ namespace SignalPet;
 
 public partial class MainWindow : Window
 {
-    private readonly SignalNotificationDetector _detector = new();
     private readonly PetAnimationController _petAnimation = new();
     private readonly SettingsService _settingsService = new();
     private readonly StartupRegistrationService _startupService = new();
     private PetSettings _settings = new();
-    private int _detectedCount;
 
     public MainWindow()
     {
@@ -21,45 +19,17 @@ public partial class MainWindow : Window
         EdgeBox.ItemsSource = Enum.GetValues<DesktopEdge>();
         EdgeBox.SelectedItem = _settings.Edge;
         StartupBox.IsChecked = _startupService.IsEnabled();
-        Loaded += OnLoaded;
-        Closed += (_, _) => _detector.Dispose();
-        _detector.SignalToastReceived += OnSignalToastReceived;
-    }
-
-    private async void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            var result = await _detector.StartAsync();
-            StatusText.Text = result switch
-            {
-                DetectorStartResult.Active => "Detection is active. New Signal toasts will be counted without reading their contents.",
-                DetectorStartResult.PermissionDenied => "Windows notification access was denied. Enable Signal Pet under Settings > Privacy & security > Notifications.",
-                DetectorStartResult.Unpackaged => "This proof of concept must be installed as an MSIX package before Windows will grant notification-listener access.",
-                _ => "Detection is unavailable on this Windows installation. See docs/STAGE-1-RESEARCH.md."
-            };
-        }
-        catch (Exception exception)
-        {
-            StatusText.Text = $"Detector could not start: {exception.GetType().Name}. See docs/STAGE-1-RESEARCH.md.";
-        }
-    }
-
-    private async void OnSignalToastReceived(object? sender, EventArgs e)
-    {
-        var animation = await Dispatcher.InvokeAsync(() =>
-        {
-            _detectedCount++;
-            StatusText.Text = $"Detection is active. Signal toast detected: {_detectedCount}. No notification text was accessed.";
-            return _petAnimation.PlayAsync(_settings.ToAnimationOptions());
-        });
-
-        await animation;
+        StatusText.Text = "Use Test pet animation to preview the text-free pet overlay.";
     }
 
     private async void OnTestPetAnimation(object sender, RoutedEventArgs e)
     {
-        await _petAnimation.PlayAsync(_settings.ToAnimationOptions());
+        var testOptions = _settings.ToAnimationOptions() with
+        {
+            PauseDuration = TimeSpan.FromSeconds(2),
+            Edge = DesktopEdge.Right
+        };
+        await _petAnimation.PlayAsync(testOptions);
     }
 
     private void OnSaveSettings(object sender, RoutedEventArgs e)

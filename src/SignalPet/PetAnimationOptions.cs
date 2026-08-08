@@ -12,7 +12,7 @@ public sealed record PetAnimationOptions(
 {
     public static PetAnimationOptions Default { get; } = new(
         WalkInDuration: TimeSpan.FromMilliseconds(900),
-        PauseDuration: TimeSpan.FromMilliseconds(1200),
+        PauseDuration: TimeSpan.FromSeconds(2),
         WalkOutDuration: TimeSpan.FromMilliseconds(900),
         PetSize: 128,
         Edge: DesktopEdge.Right);
