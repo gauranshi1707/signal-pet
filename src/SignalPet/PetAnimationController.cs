@@ -38,7 +38,7 @@ public sealed class PetAnimationController
             // Keep every WPF operation on the application's UI dispatcher.
             await Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                overlay = new PetOverlayWindow(options, new PlaceholderPetVisualFactory());
+                overlay = new PetOverlayWindow(options, new TuxedoCatVisualFactory());
                 overlay.Show();
                 playback = overlay.PlayAsync();
             });

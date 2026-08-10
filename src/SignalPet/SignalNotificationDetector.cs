@@ -65,8 +65,17 @@ public sealed class SignalNotificationDetector : IDisposable
         try
         {
             var notification = sender.GetNotification(args.UserNotificationId);
-            if (notification is not null && IsFromSignal(notification))
+            if (notification is null)
             {
+                return;
+            }
+
+            // This is the only toast metadata deliberately read by Signal Pet.
+            var appUserModelId = notification.AppInfo.AppUserModelId;
+
+            if (IsFromSignal(appUserModelId))
+            {
+                _listener.RemoveNotification(notification.Id);
                 SignalToastReceived?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -77,11 +86,10 @@ public sealed class SignalNotificationDetector : IDisposable
         }
     }
 
-    private static bool IsFromSignal(UserNotification notification)
+    private static bool IsFromSignal(string? appUserModelId)
     {
         // Examine only the originating application's AUMID, never its toast payload.
-        var appUserModelId = notification.AppInfo.AppUserModelId;
-        return string.Equals(appUserModelId, "Signal", StringComparison.OrdinalIgnoreCase);
+        return string.Equals(appUserModelId, "org.whispersystems.signal-desktop", StringComparison.OrdinalIgnoreCase);
     }
 
     public void Dispose()

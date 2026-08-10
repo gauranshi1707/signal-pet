@@ -5,4 +5,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Cat\*.png" />
+  </ItemGroup>
 </Project>

@@ -13,3 +13,11 @@ AppPackages/
 
 # Local application data
 appsettings.local.json
+
+# Local MSIX packaging output
+work/
+outputs/
+*.appx
+*.appxbundle
+*.pri
+*.pvk

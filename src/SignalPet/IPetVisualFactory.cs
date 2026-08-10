@@ -8,5 +8,20 @@ namespace SignalPet;
 /// </summary>
 public interface IPetVisualFactory
 {
-    FrameworkElement Create(double size);
+    IPetVisual Create(double size, DesktopEdge edge);
+}
+
+/// <summary>Artwork whose frames can respond to the overlay's animation phase.</summary>
+public interface IPetVisual
+{
+    FrameworkElement Element { get; }
+
+    void Update(PetAnimationPhase phase, TimeSpan phaseElapsed, TimeSpan pauseDuration);
+}
+
+public enum PetAnimationPhase
+{
+    Entering,
+    Reacting,
+    Leaving
 }

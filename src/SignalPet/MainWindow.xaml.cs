@@ -41,7 +41,9 @@ public partial class MainWindow : Window
         }
         catch (Exception exception)
         {
-            StatusText.Text = $"Notification-listener startup failed: {exception.GetType().Name}.";
+            StatusText.Text = exception is System.Runtime.InteropServices.COMException comException
+                ? $"Notification-listener startup failed: COMException 0x{comException.HResult:X8}."
+                : $"Notification-listener startup failed: {exception.GetType().Name}.";
         }
     }
 
@@ -52,11 +54,7 @@ public partial class MainWindow : Window
 
     private async void OnTestPetAnimation(object sender, RoutedEventArgs e)
     {
-        var testOptions = _settings.ToAnimationOptions() with
-        {
-            PauseDuration = TimeSpan.FromSeconds(2),
-            Edge = DesktopEdge.Right
-        };
+        var testOptions = _settings.ToAnimationOptions() with { PauseDuration = TimeSpan.FromSeconds(2) };
         await _petAnimation.PlayAsync(testOptions);
     }
 

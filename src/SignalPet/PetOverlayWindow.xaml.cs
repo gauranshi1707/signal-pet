@@ -11,20 +11,24 @@ namespace SignalPet;
 public partial class PetOverlayWindow : Window
 {
     private const int GwlExStyle = -20;
-    private const long WsExTransparent = 0x00000020L;
+    private const int WmNCHitTest = 0x0084;
+    private const int HtClient = 1;
+    private const int HtTransparent = -1;
     private const long WsExNoActivate = 0x08000000L;
     private const long WsExToolWindow = 0x00000080L;
     private readonly PetAnimationOptions _options;
-    private readonly FrameworkElement _pet;
+    private readonly IPetVisual _pet;
     private readonly Stopwatch _clock = new();
     private readonly DispatcherTimer _timer;
     private readonly TaskCompletionSource _completed = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly Rect _workArea;
+    private readonly SignalDesktopActivator _signalDesktopActivator = new();
+    private HwndSource? _windowSource;
 
     public PetOverlayWindow(PetAnimationOptions options, IPetVisualFactory visualFactory)
     {
         _options = options;
-        _pet = visualFactory.Create(options.PetSize);
+        _pet = visualFactory.Create(options.PetSize, options.Edge);
         _workArea = SystemParameters.WorkArea;
         InitializeComponent();
 
@@ -32,14 +36,17 @@ public partial class PetOverlayWindow : Window
         Top = _workArea.Top;
         Width = _workArea.Width;
         Height = _workArea.Height;
-        Stage.Children.Add(_pet);
+        Stage.IsHitTestVisible = true;
+        _pet.Element.IsHitTestVisible = true;
+        _pet.Element.MouseLeftButtonUp += (_, _) => _signalDesktopActivator.ActivateOrLaunch();
+        Stage.Children.Add(_pet.Element);
 
         _timer = new DispatcherTimer(DispatcherPriority.Render)
         {
             Interval = TimeSpan.FromMilliseconds(16)
         };
         _timer.Tick += OnFrame;
-        SourceInitialized += (_, _) => MakeInputTransparent();
+        SourceInitialized += (_, _) => ConfigureInputRouting();
     }
 
     public Task PlayAsync()
@@ -62,9 +69,9 @@ public partial class PetOverlayWindow : Window
         }
 
         var x = CalculateX(elapsed);
-        Canvas.SetLeft(_pet, x);
-        Canvas.SetTop(_pet, Height - _options.PetSize - 24);
-        AnimateWalkBounce(elapsed);
+        Canvas.SetLeft(_pet.Element, x);
+        Canvas.SetTop(_pet.Element, Height - _options.PetSize - 24);
+        AnimatePet(elapsed);
     }
 
     private double CalculateX(TimeSpan elapsed)
@@ -94,17 +101,52 @@ public partial class PetOverlayWindow : Window
             : Lerp(restingX, -outside, outProgress);
     }
 
-    private void AnimateWalkBounce(TimeSpan elapsed)
+    private void AnimatePet(TimeSpan elapsed)
     {
-        var isWalking = elapsed < _options.WalkInDuration || elapsed > _options.WalkInDuration + _options.PauseDuration;
-        _pet.RenderTransform = new TranslateTransform(0, isWalking ? Math.Sin(elapsed.TotalMilliseconds / 75) * 4 : 0);
+        var pauseStart = _options.WalkInDuration;
+        var pauseEnd = pauseStart + _options.PauseDuration;
+        var isEntering = elapsed < pauseStart;
+        var isLeaving = elapsed >= pauseEnd;
+        var phase = isEntering
+            ? PetAnimationPhase.Entering
+            : isLeaving ? PetAnimationPhase.Leaving : PetAnimationPhase.Reacting;
+        var phaseElapsed = isEntering
+            ? elapsed
+            : isLeaving ? elapsed - pauseEnd : elapsed - pauseStart;
+        var isWalking = isEntering || isLeaving;
+
+        _pet.Update(phase, phaseElapsed, _options.PauseDuration);
+        var verticalOffset = isWalking
+            ? Math.Sin(phaseElapsed.TotalMilliseconds / 75) * 4
+            : Math.Sin(phaseElapsed.TotalMilliseconds / 330) * 1.25;
+        _pet.Element.RenderTransform = new TranslateTransform(0, verticalOffset);
     }
 
-    private void MakeInputTransparent()
+    private void ConfigureInputRouting()
     {
         var handle = new WindowInteropHelper(this).Handle;
         var style = GetWindowLongPtr(handle, GwlExStyle).ToInt64();
-        SetWindowLongPtr(handle, GwlExStyle, new IntPtr(style | WsExTransparent | WsExNoActivate | WsExToolWindow));
+        SetWindowLongPtr(handle, GwlExStyle, new IntPtr(style | WsExNoActivate | WsExToolWindow));
+        _windowSource = HwndSource.FromHwnd(handle);
+        _windowSource?.AddHook(WindowProcedure);
+    }
+
+    private IntPtr WindowProcedure(IntPtr handle, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (message != WmNCHitTest)
+        {
+            return IntPtr.Zero;
+        }
+
+        var screenPoint = new Point(
+            (short)(lParam.ToInt64() & 0xffff),
+            (short)((lParam.ToInt64() >> 16) & 0xffff));
+        var windowPoint = PointFromScreen(screenPoint);
+        var petOrigin = _pet.Element.TranslatePoint(new Point(), this);
+        var petBounds = new Rect(petOrigin, _pet.Element.RenderSize);
+
+        handled = true;
+        return petBounds.Contains(windowPoint) ? new IntPtr(HtClient) : new IntPtr(HtTransparent);
     }
 
     private static double Lerp(double from, double to, double progress) => from + ((to - from) * Math.Clamp(progress, 0, 1));

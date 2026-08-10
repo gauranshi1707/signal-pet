@@ -2,30 +2,33 @@
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
          xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
          xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-         xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
+         xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
          xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
          xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-         IgnorableNamespaces="uap uap5 desktop rescap mp">
+         IgnorableNamespaces="uap uap3 desktop rescap mp">
   <Identity Name="SignalPet" Publisher="CN=SignalPetDevelopment" Version="0.1.0.0" />
   <mp:PhoneIdentity PhoneProductId="d927ca5e-32ad-4154-9a84-aa6a50217c9f" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Signal Pet</DisplayName>
     <PublisherDisplayName>Signal Pet</PublisherDisplayName>
-    <Logo>Assets\\StoreLogo.png</Logo>
+    <Logo>Assets/StoreLogo.png</Logo>
   </Properties>
   <Resources>
     <Resource Language="en-us" />
   </Resources>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.28000.0" />
+  </Dependencies>
   <Applications>
     <Application Id="App" Executable="SignalPet.exe" EntryPoint="Windows.FullTrustApplication">
-      <uap:VisualElements DisplayName="Signal Pet" Description="Privacy-preserving Signal notification pet" BackgroundColor="transparent" Square150x150Logo="Assets\\Square150x150Logo.png" Square44x44Logo="Assets\\Square44x44Logo.png" />
+      <uap:VisualElements DisplayName="Signal Pet" Description="Privacy-preserving Signal notification pet" BackgroundColor="transparent" Square150x150Logo="Assets/Square150x150Logo.png" Square44x44Logo="Assets/Square44x44Logo.png" />
       <Extensions>
         <desktop:Extension Category="windows.fullTrustProcess" Executable="SignalPet.exe" EntryPoint="Windows.FullTrustApplication" />
       </Extensions>
     </Application>
   </Applications>
   <Capabilities>
-    <uap5:Capability Name="userNotificationListener" />
+    <uap3:Capability Name="userNotificationListener" />
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>
