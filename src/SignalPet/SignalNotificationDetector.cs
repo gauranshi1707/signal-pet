@@ -25,7 +25,11 @@ public sealed class SignalNotificationDetector : IDisposable
 
         try
         {
-            var access = await _listener.RequestAccessAsync();
+            var access = _listener.GetAccessStatus();
+            if (access != UserNotificationListenerAccessStatus.Allowed)
+            {
+                access = await _listener.RequestAccessAsync();
+            }
             if (access != UserNotificationListenerAccessStatus.Allowed)
             {
                 return access == UserNotificationListenerAccessStatus.Denied
@@ -58,19 +62,26 @@ public sealed class SignalNotificationDetector : IDisposable
             return;
         }
 
-        var notification = sender.GetNotification(args.UserNotificationId);
-        if (notification is not null && IsFromSignal(notification))
+        try
         {
-            SignalToastReceived?.Invoke(this, EventArgs.Empty);
+            var notification = sender.GetNotification(args.UserNotificationId);
+            if (notification is not null && IsFromSignal(notification))
+            {
+                SignalToastReceived?.Invoke(this, EventArgs.Empty);
+            }
+        }
+        catch
+        {
+            // A toast can disappear between the event and metadata lookup.
+            // There is intentionally no logging of notification data.
         }
     }
 
     private static bool IsFromSignal(UserNotification notification)
     {
-        // Signal's classic desktop install does not expose a stable public package
-        // identity. Match only the app display name; do not inspect toast content.
-        var displayName = notification.AppInfo.DisplayInfo.DisplayName;
-        return string.Equals(displayName, "Signal", StringComparison.OrdinalIgnoreCase);
+        // Examine only the originating application's AUMID, never its toast payload.
+        var appUserModelId = notification.AppInfo.AppUserModelId;
+        return string.Equals(appUserModelId, "Signal", StringComparison.OrdinalIgnoreCase);
     }
 
     public void Dispose()

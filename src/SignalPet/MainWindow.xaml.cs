@@ -4,6 +4,7 @@ namespace SignalPet;
 
 public partial class MainWindow : Window
 {
+    private readonly SignalNotificationDetector _detector = new();
     private readonly PetAnimationController _petAnimation = new();
     private readonly SettingsService _settingsService = new();
     private readonly StartupRegistrationService _startupService = new();
@@ -19,7 +20,34 @@ public partial class MainWindow : Window
         EdgeBox.ItemsSource = Enum.GetValues<DesktopEdge>();
         EdgeBox.SelectedItem = _settings.Edge;
         StartupBox.IsChecked = _startupService.IsEnabled();
-        StatusText.Text = "Use Test pet animation to preview the text-free pet overlay.";
+        StatusText.Text = "Checking notification-listener access…";
+        Loaded += OnLoaded;
+        Closed += (_, _) => _detector.Dispose();
+        _detector.SignalToastReceived += OnSignalToastReceived;
+    }
+
+    private async void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var result = await _detector.StartAsync();
+            StatusText.Text = result switch
+            {
+                DetectorStartResult.Active => "Notification-listener access is active. Use Test pet animation to preview the pet.",
+                DetectorStartResult.PermissionDenied => "Windows notification-listener access was denied. Enable it in Windows Settings, then restart Signal Pet.",
+                DetectorStartResult.Unpackaged => "Notification-listener access requires the installed MSIX package.",
+                _ => "Windows notification-listener access is unavailable."
+            };
+        }
+        catch (Exception exception)
+        {
+            StatusText.Text = $"Notification-listener startup failed: {exception.GetType().Name}.";
+        }
+    }
+
+    private async void OnSignalToastReceived(object? sender, EventArgs e)
+    {
+        await _petAnimation.TryPlayAsync(_settings.ToAnimationOptions() with { Edge = DesktopEdge.Right });
     }
 
     private async void OnTestPetAnimation(object sender, RoutedEventArgs e)

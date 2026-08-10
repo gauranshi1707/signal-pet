@@ -12,6 +12,23 @@ public sealed class PetAnimationController
     public async Task PlayAsync(PetAnimationOptions options)
     {
         await _gate.WaitAsync().ConfigureAwait(false);
+        await RunAnimationAsync(options).ConfigureAwait(false);
+    }
+
+    /// <summary>Starts an animation only when no pet is currently visible.</summary>
+    public async Task<bool> TryPlayAsync(PetAnimationOptions options)
+    {
+        if (!await _gate.WaitAsync(0).ConfigureAwait(false))
+        {
+            return false;
+        }
+
+        await RunAnimationAsync(options).ConfigureAwait(false);
+        return true;
+    }
+
+    private async Task RunAnimationAsync(PetAnimationOptions options)
+    {
         try
         {
             PetOverlayWindow? overlay = null;
